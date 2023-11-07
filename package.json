@@ -1,0 +1,26 @@
+{
+  "name": "fourwise",
+  "version": "0.0.0",
+  "description": "4 Wikipedia articles and their vibes",
+  "main": "src/game.js",
+  "private": true,
+  "scripts": {
+    "build": "mkdir -p dist && cp -r src/* dist/",
+    "release": "npm run build && npm run deploy",
+    "deploy": "gh-pages -d dist/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ReneeCai/fourwise.git"
+  },
+  "author": "ReneeCai",
+  "contributors": ["lazd"],
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/ReneeCai/fourwise/issues"
+  },
+  "homepage": "https://github.com/ReneeCai/fourwise#readme",
+  "devDependencies": {
+    "gh-pages": "^6.0.0"
+  }
+}
