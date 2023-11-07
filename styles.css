@@ -1,10 +1,14 @@
 html {
   font-size: 12px;
   --spacing: 1rem;
+  --border-radius: 0.25rem;
   --color-background: white;
   --color-foreground: black;
+  --color-focus: rgb(59, 112, 211);
   --color-shadow: rgba(0, 0, 0, 0.5);
   --button-size: 6rem;
+  --focus-size: 2px;
+  --focus-gap: 4px;
   --indicator-size: 2rem;
   --image-size: 6rem;
 }
@@ -79,6 +83,18 @@ body {
   height: 100%;
 }
 
+/** links */
+a {
+  border-radius: var(--border-radius);
+}
+a:focus-visible {
+  outline: var(--focus-size) solid var(--color-focus);
+  outline-offset: var(--focus-gap);
+}
+.article-link:is(:hover, :focus-visible) {
+  text-decoration: underline;
+}
+
 /** buttons */
 .button {
   font-size: calc(var(--button-size) / 1.5);
@@ -92,11 +108,11 @@ body {
   appearance: none;
   cursor: pointer;
   opacity: 0.75;
-  transition: opacity 125ms linear;
 }
-.button:hover,
 .button:focus-visible {
-  opacity: 1;
+  outline: var(--focus-size) solid var(--color-focus);
+  outline-offset: var(--focus-gap);
+  z-index: 1;
 }
 
 #refresh {
@@ -120,7 +136,6 @@ body {
 
 .article-image {
   position: absolute;
-  transition: opacity 125ms linear;
   height: 100%;
   width: 100%;
   border-radius: 100%;
@@ -129,14 +144,14 @@ body {
   aspect-ratio: 1 / 1;
 }
 
-.article-imageContainer:hover .article-image,
+.article-imageContainer:is(:hover, :focus-within) .article-image,
 .article-imageContainer .article-buttons {
   opacity: 0;
 }
 
 .article.is-editing .article-edit,
 .article-imageContainer .article-image,
-.article-imageContainer:hover .article-buttons {
+.article-imageContainer:is(:hover, :focus-within) .article-buttons {
   opacity: 1;
 }
 
@@ -147,13 +162,13 @@ body {
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
-  box-shadow: 0 0 1rem var(--color-shadow);
   border-radius: 1rem;
-  overflow: hidden; /* clip buttons */
+  gap: 1rem;
 }
 .article-buttons .button {
   flex-shrink: 0;
-  border-radius: 0;
+  border-radius: calc(var(--border-radius) + var(--focus-gap));
+  box-shadow: 0 0 0.5rem var(--color-shadow);
 }
 
 .article,
@@ -168,9 +183,16 @@ body {
   font-weight: bold;
   appearance: none;
   border: none;
+  border-radius: var(--border-radius);
   background: var(--color-background);
   
   display: none;
+}
+
+.article-search:focus-visible {
+  border: none;
+  outline: var(--focus-size) solid var(--color-focus);
+  outline-offset: calc(var(--focus-gap) / 2);
 }
 
 .article.is-editing .article-link {
@@ -181,20 +203,14 @@ body {
   display: inline-block;
 }
 
-.article-title {
-  text-align: center;
-  margin: 0;
-  font-size: 1.5rem;
-  text-shadow: 0.25rem 0 var(--color-background);
-}
 .article-link {
+  margin: 0;
   text-decoration: none;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-shadow: 0.25rem 0 var(--color-background);
   color: var(--color-foreground);
-}
-
-.article-link:hover,
-.article-link:focus-visible {
-  text-decoration: underline;
 }
 
 .article:nth-child(1) .article-search,
@@ -213,8 +229,7 @@ body {
   right: 0;
   transform: translate(0, -50%);
 }
-.article:nth-child(2),
-.article:nth-child(2) .article-link {
+.article:nth-child(2) {
   flex-direction: row-reverse;
 }
 
@@ -223,7 +238,7 @@ body {
   flex-direction: row;
 }
 
-.article:nth-child(2) .article-title {
+.article:nth-child(2) :is(.article-link, .article-search) {
   text-align: end;
 }
 
@@ -237,8 +252,8 @@ body {
   left: 0;
   top: 50%;
   transform: translate(0, -50%);
-},
-.article:nth-child(4) .article-title {
+}
+.article:nth-child(4) :is(.article-link, .article-search) {
   text-align: left;
 }
 

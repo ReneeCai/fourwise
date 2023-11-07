@@ -22,9 +22,7 @@ template.innerHTML = `<div class="article">
     </div>
   </div>
   <input type="text" class="article-search">
-  <a target="blank" href="" class="article-link">
-    <h2 class="article-title"></h2>
-  </a>
+  <a target="blank" href="" class="article-link"></a>
 </div>`;
 
 async function wikipediaAPI(queryParams) {
@@ -52,7 +50,7 @@ async function getRandomArticles() {
   if (responseData) {
     articles = Object.values(responseData.query.pages).filter(article => article.thumbnail).slice(0,4);
   }
-  
+
   // Make sure we get 4 that have thumbnails
   if (articles.length < 4) {
     const moreArticles = await getRandomArticles();
@@ -75,26 +73,44 @@ async function articleSearch(query) {
 const printArticles = async () => {
   const articles = await getRandomArticles();
   articlesEl.innerHTML = '';
-  for (let article of articles) {
-    const articleEl = template.content.cloneNode(true);
-    setArticleContent(articleEl, article);
-    articlesEl.appendChild(articleEl);
+  for (let [index, article] of Object.entries(articles)) {
+    const articleFragment = template.content.cloneNode(true);
+    setArticleContent(articleFragment, article, index);
+    articleFragment.firstElementChild.setAttribute('data-index', index);
+    articlesEl.appendChild(articleFragment);
   }
 };
 
 async function replaceWithRandom(articleEl) {
   // todo: fetch less from Wikipedia API when replacing one article
   const articles = await getRandomArticles();
-  setArticleContent(articleEl, articles[0]);
+  setArticleContent(articleEl, articles[0], articleEl.getAttribute('data-index'));
 }
 
-function setArticleContent(articleEl, article) {
+function setArticleContent(articleEl, article, index) {
   articleEl.querySelector('.article-link').href = `https://en.wikipedia.org/?curid=${article.pageid}`;
-  articleEl.querySelector('.article-title').innerText = article.title;
+  articleEl.querySelector('.article-link').innerText = article.title;
   articleEl.querySelector('.article-image').src = article.thumbnail?.source;
   articleEl.querySelector('.article-image').alt = article.title;
 
   // todo: change aria-label of sliders to correspond to the names of the articles so we're accessible
+  if (index === "0") {
+    ySlider.setAttribute('data-max-label', article.title);
+    setSliderLabel(ySlider);
+  } else if (index === "1") {
+    xSlider.setAttribute('data-max-label', article.title);
+    setSliderLabel(xSlider);
+  } else if (index === "2") {
+    ySlider.setAttribute('data-min-label', article.title);
+    setSliderLabel(ySlider);
+  } else if (index === "3") {
+    xSlider.setAttribute('data-min-label', article.title);
+    setSliderLabel(xSlider);
+  }
+}
+
+function setSliderLabel(sliderEl) {
+  sliderEl.ariaLabel = `${sliderEl.getAttribute('data-min-label') ?? 'nothing'} versus ${sliderEl.getAttribute('data-max-label') ?? 'nothing'}`;
 }
 
 function clamp(value, min, max) {
@@ -133,22 +149,25 @@ function setPlayerPositionFromSliders() {
 async function doSearch(articleEl) {
   const query = articleEl.querySelector('.article-search').value;
   const results = await articleSearch(query);
-  setArticleContent(articleEl, results[0]);
+  setArticleContent(articleEl, results[0], articleEl.getAttribute('data-index'));
   toggleEditMode(articleEl);
 }
 
-function toggleEditMode(articleEl) {
-  if (articleEl.classList.contains('is-editing')) {
+function toggleEditMode(articleEl, force) {
+  let isEditing = force !== undefined ? !force : articleEl.classList.contains('is-editing');
+  if (isEditing) {
     articleEl.classList.remove('is-editing');
+    const link = articleEl.querySelector('.article-link');
+    link.focus();
     gameState.editingEl = null;
   }
   else {
     if (gameState.editingEl) {
-      toggleEditMode(gameState.editingEl);
+      toggleEditMode(gameState.editingEl, false);
     }
     gameState.editingEl = articleEl;
     articleEl.classList.add('is-editing');
-    const existingText = articleEl.querySelector('.article-title').innerText;
+    const existingText = articleEl.querySelector('.article-link').innerText;
     const searchField = articleEl.querySelector('.article-search');
     searchField.value = existingText;
     searchField.focus();
@@ -235,6 +254,13 @@ gameEl.addEventListener('click', (event) => {
   }
   else if (!event.target.closest('.article')) {
     handleMouseEvent(event);
+  }
+});
+
+gameEl.addEventListener('focusout', (event) => {
+  if (event.target.closest('.article-search')) {
+    const articleEl = event.target.closest('.article');
+    toggleEditMode(articleEl, false);
   }
 });
 
