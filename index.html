@@ -1,0 +1,26 @@
+<html>
+  <head>
+    <title>FourWise</title>
+    <meta charset="utf8">
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div id="app">
+      <div id="game">
+        <button class="button" id="refresh">♻️</button>
+        <div id="grid"></div>
+        <div id="articles"></div>
+        <input class="slider" id="y-slider" type="range" min="0" max="100" name="y" orient="vertical">
+        <input class="slider" id="x-slider" type="range" min="0" max="100" name="x">
+        <div id="indicators">      
+          <div data-player="0" class="indicator"></div>
+          <div data-player="1" class="indicator"></div>
+          <div data-player="2" class="indicator"></div>
+          <div data-player="3" class="indicator"></div>
+        </div>
+      </div>
+    </div>
+    <script src="./game.js"></script>
+  </body>
+</html>
